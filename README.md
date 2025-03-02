@@ -1,5 +1,5 @@
-# Simple Static Sites
+# Simple Static Site
 
-Simple Static Sites for testing proposes.
+Simple Static Site for testing proposes.
 
 Use it howerver you want. 💪
