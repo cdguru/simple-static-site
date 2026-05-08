@@ -40,6 +40,26 @@ pipeline {
             }
         }
         
+        stage('Validate Parameters') {
+            steps {
+                script {
+                    echo "=== Validating Required Parameters ==="
+                    if (!params.TARGET_IP || params.TARGET_IP.isEmpty()) {
+                        error("❌ TARGET_IP parameter is required!")
+                    }
+                    if (!params.PRIVATE_KEY_PATH || params.PRIVATE_KEY_PATH.isEmpty()) {
+                        error("❌ PRIVATE_KEY_PATH parameter is required!")
+                    }
+                    echo "✅ TARGET_IP: ${params.TARGET_IP}"
+                    echo "✅ INSTANCE_USER: ${params.INSTANCE_USER}"
+                    echo "✅ PRIVATE_KEY_PATH: ${params.PRIVATE_KEY_PATH}"
+                    echo "✅ REPOSITORY_URL: ${params.REPOSITORY_URL}"
+                    echo "✅ ENVIRONMENT: ${params.ENVIRONMENT}"
+                    echo "✅ ACTION: ${params.ACTION}"
+                }
+            }
+        }
+        
         stage('Validate') {
             steps {
                 script {
@@ -63,6 +83,12 @@ pipeline {
                     echo "=== Generating Terraform Plan ==="
                     dir('terraform') {
                         sh '''
+                            echo "Environment Variables:"
+                            echo "TF_VAR_target_ip=${TF_VAR_target_ip}"
+                            echo "TF_VAR_instance_user=${TF_VAR_instance_user}"
+                            echo "TF_VAR_repository_url=${TF_VAR_repository_url}"
+                            echo "TF_VAR_environment=${TF_VAR_environment}"
+                            
                             terraform init
                             terraform plan -out=tfplan
                         '''
