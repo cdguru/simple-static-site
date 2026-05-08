@@ -1,16 +1,13 @@
 # ============================================================================
-# Terraform Configuration for Deployment-Only Mode
-# Deploys to EXISTING EC2 instance - DO NOT CREATE resources
+# Terraform Configuration for SSH-based Deployment
+# Deploys to EXISTING server via SSH - NO AWS credentials required
 # ============================================================================
 
-# REQUIRED: AWS region where your instance exists
-aws_region = "us-east-1"
+# REQUIRED: IP address of the target server (public or private IP)
+# Example: 54.123.45.67 or 192.168.1.100
+target_ip = "YOUR_SERVER_IP_HERE"  # UPDATE THIS!
 
-# REQUIRED: Instance ID of your EXISTING EC2 instance
-# Example: i-0123456789abcdef
-instance_id = "i-XXXXXXXXXXXXXXXXX"  # UPDATE THIS!
-
-# REQUIRED: Path to your EC2 key pair (.pem file)
+# REQUIRED: Path to your SSH private key file (.pem or similar)
 # Example: ~/.ssh/my-key.pem or /path/to/key.pem
 private_key_path = "/path/to/your/key.pem"  # UPDATE THIS!
 
@@ -18,19 +15,11 @@ private_key_path = "/path/to/your/key.pem"  # UPDATE THIS!
 # Example: https://github.com/username/simple-static-site.git
 repository_url = "https://github.com/cdguru/simple-static-site.git"
 
-# OPTIONAL: SSH user for the instance
+# OPTIONAL: SSH user for the server
 # ec2-user = Amazon Linux
 # ubuntu   = Ubuntu
 # admin    = Debian
 instance_user = "ec2-user"
 
-# OPTIONAL: Specific security group ID to modify
-# Leave empty to use the instance's primary security group
-security_group_id = ""
-
-# OPTIONAL: Enable/disable ports on security group
-enable_http  = true
-enable_https = true
-
-# Reference name for environment
+# OPTIONAL: Environment name for reference/logging
 environment = "production"

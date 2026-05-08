@@ -1,79 +1,15 @@
 # ============================================================================
 # Terraform Configuration for DEPLOYMENT-ONLY Mode
-# Target: EXISTING EC2 Instance (no resource creation)
+# Target: EXISTING Server via SSH (no AWS resources needed)
 # ============================================================================
 
 terraform {
   required_version = ">= 1.0"
   required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
     null = {
       source  = "hashicorp/null"
       version = "~> 3.0"
     }
-  }
-}
-
-provider "aws" {
-  region = var.aws_region
-}
-
-# ============================================================================
-# Data Sources: Retrieve information about EXISTING resources
-# ============================================================================
-
-# Get the EXISTING EC2 instance by instance ID
-data "aws_instance" "target" {
-  instance_id = var.instance_id
-
-  filter {
-    name   = "instance-state-name"
-    values = ["running"]
-  }
-}
-
-# Get the security group attached to the instance
-# Use provided security_group_id if specified, otherwise use the instance's primary security group
-data "aws_security_group" "target" {
-  id = var.security_group_id != "" ? var.security_group_id : data.aws_instance.target.vpc_security_group_ids[0]
-}
-
-# ============================================================================
-# Resources: Only modify security group rules (if needed)
-# ============================================================================
-
-# Add HTTP access to security group if enabled
-resource "aws_security_group_rule" "allow_http" {
-  count       = var.enable_http ? 1 : 0
-  type        = "ingress"
-  from_port   = 80
-  to_port     = 80
-  protocol    = "tcp"
-  cidr_blocks = ["0.0.0.0/0"]
-
-  security_group_id = data.aws_security_group.target.id
-
-  tags = {
-    Name = "allow-http-app"
-  }
-}
-
-# Add HTTPS access to security group if enabled
-resource "aws_security_group_rule" "allow_https" {
-  count       = var.enable_https ? 1 : 0
-  type        = "ingress"
-  from_port   = 443
-  to_port     = 443
-  protocol    = "tcp"
-  cidr_blocks = ["0.0.0.0/0"]
-
-  security_group_id = data.aws_security_group.target.id
-
-  tags = {
-    Name = "allow-https-app"
   }
 }
 
@@ -82,8 +18,8 @@ resource "aws_security_group_rule" "allow_https" {
 # ============================================================================
 
 locals {
-  # Use private IP if available, otherwise use public IP
-  target_ip = data.aws_instance.target.private_ip != "" ? data.aws_instance.target.private_ip : data.aws_instance.target.public_ip
+  # Target IP is provided directly by the user
+  target_ip = var.target_ip
 
   # Deployment script to execute on the instance
   deploy_script = <<-EOF
@@ -147,9 +83,8 @@ locals {
 
 resource "null_resource" "deploy" {
   triggers = {
-    instance_id      = data.aws_instance.target.id
+    target_ip        = var.target_ip
     repository_url   = var.repository_url
-    target_ip        = local.target_ip
     instance_user    = var.instance_user
     private_key_path = var.private_key_path
   }
