@@ -30,8 +30,8 @@ locals {
     echo "Repository: ${var.repository_url}"
     echo "Time: $(date)"
 
-    # Create application directory
-    APP_DIR="/opt/simple-static-site"
+    # Create application directory in user's home directory under apps/
+    APP_DIR="$HOME/apps/simple-static-site"
     mkdir -p "$APP_DIR"
     cd "$APP_DIR"
 
